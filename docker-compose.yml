@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  service1:
+    build:
+      context: ./service1
+    container_name: service1
+    healthcheck:
+      test: ["CMD", "pidof", "service1"]
+      interval: 10s
+      retries: 3
+
+  service2:
+    build:
+      context: ./service2
+    container_name: service2
+    healthcheck:
+      test: ["CMD", "pidof", "python3"]
+      interval: 10s
+      retries: 3
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      service1:
+        condition: service_healthy
+      service2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
